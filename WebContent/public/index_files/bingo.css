@@ -28,9 +28,8 @@ th, td {
   padding: 10px;
   border: 2px black solid;
   text-align: center;
-  width: 20%;
 }
 
-#free, .pickedBG {
+#free, .selected {
   background-color: LightCoral;
 }

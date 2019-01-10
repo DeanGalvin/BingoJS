@@ -9,57 +9,91 @@ ISBN 978-0-321-99670-1
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>JavaScript Bingo</title>
     <link rel="stylesheet" href="index_files/bingo.css">
-    <script type="text/javascript" src="index_files/bingo.js"></script>
+    <!--<script type="text/javascript" src="index_files/bingo.js"></script>-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+
+    <script>
+    $( document ).ready(function() {
+
+        // When join button is clicked
+        $("#btnJoin").click(function() {
+            var playerName = $("input[name=player_name").val();
+            joinGame(playerName);
+        });
+
+        // When claim victory button is clicked
+        $("#btnClaimVictory").click(function() {
+            claimVictory();
+        });
+
+        // Notify the server, gets and display the board
+        function joinGame(playerName) {
+            var numberOfRows = 3;
+            var numberOfColumns = 9;
+            var boardTable = $("<table>");
+            boardTable.attr("id", "board");
+            var tileId = 0;
+            // Create the rows
+            for(var i = 0; i < numberOfRows; i++) {
+                var row = $("<tr>");
+                // Create the "tiles"
+                for(var j = 0; j < numberOfColumns; j++) {
+                    var tile = $("<td>");
+                    tile.attr("id", tileId);
+                    tile.text("TBD");
+                    row.append(tile);
+                    tileId++;
+                    // Toggle the select class when clicked
+                    tile.click(function() {
+                        $(this).toggleClass("selected");
+                    });
+                }
+                boardTable.append(row);
+            }
+            $("#boardContainer").html(boardTable);
+        }
+
+        function claimVictory() {
+            var selectedNumberList = [];
+            $(".selected").each(function() {
+                var square = $(this);
+                var selectedNumber = {};
+                selectedNumber.id = square.attr("id");
+                selectedNumber.number = square.html();
+                selectedNumberList.push(selectedNumber);
+            });
+            alert(JSON.stringify(selectedNumberList));
+        }
+
+        //
+        <!--
+        function getBoard() {
+            $.get( "ajax/test.html", function( data ) {
+                $( ".result" ).html( data );
+                alert( "Load was performed." );
+            });
+
+            return xyz;
+        }
+        -->
+
+    });
+
+
+
+    </script>
+
+
 </head>
 <body>
+
+    Name: <input type="text" name="player_name">
+    <button id="btnJoin">Join Bingo</button>
+
+    <div id="numbersContainer"></div>
+
     <h1>JavaScript Bingo</h1>
-    <table>
-        <tbody><tr>
-            <th>B</th>
-            <th>I</th>
-            <th>N</th>
-            <th>G</th>
-            <th>O</th>
-        </tr>
-        <tr>
-            <td id="square0" class="">9</td>
-            <td id="square5" class="">29</td>
-            <td id="square10" class="">32</td>
-            <td id="square14" class="">54</td>
-            <td id="square19" class="">64</td>
-        </tr>
-        <tr>
-            <td id="square1" class="">11</td>
-            <td id="square6" class="">24</td>
-            <td id="square11" class="">37</td>
-            <td id="square15" class="">59</td>
-            <td id="square20" class="">71</td>
-        </tr>
-        <tr>
-            <td id="square2" class="">12</td>
-            <td id="square7" class="">22</td>
-            <td id="free">Free</td>
-            <td id="square16" class="">53</td>
-            <td id="square21" class="">67</td>
-        </tr>
-        <tr>
-            <td id="square3" class="">7</td>
-            <td id="square8" class="">16</td>
-            <td id="square12" class="">45</td>
-            <td id="square17" class="">47</td>
-            <td id="square22" class="">75</td>
-        </tr>
-        <tr>
-            <td id="square4" class="">10</td>
-            <td id="square9" class="">26</td>
-            <td id="square13" class="">43</td>
-            <td id="square18" class="">51</td>
-            <td id="square23" class="">66</td>
-        </tr>
-    </tbody></table>
-    <p>
-        <a href="https://www.cs.sjsu.edu/~mak/CMPE280/code/bingo/bingo.html" id="reload">Click here</a> 
-        to create a new card
-    </p>
+    <div id="boardContainer"></div>
+    <button id="btnClaimVictory">Claim victory</button>
 
 </body></html>

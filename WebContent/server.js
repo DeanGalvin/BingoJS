@@ -13,10 +13,14 @@ app.use(express.static('public'));
 io.on('connection', function(socket) {
     socket.on('connect', function(user) {
         console.log('user connected: ' + user);
+    });
+
+    socket.on('joined game', function(user) {
+        console.log('user connected: ' + user);
         players.push(user);
-        io.emit('user messages', user + " has joined");
+        io.emit('user messages', user + ": has joined");
         if (players.length === 2) {
-                startGame();
+            startGame();
         }
     });
 

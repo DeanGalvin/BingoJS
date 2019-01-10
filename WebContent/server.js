@@ -11,10 +11,6 @@ var randNumber = 9999;
 app.use(express.static('public'));
 
 io.on('connection', function(socket) {
-    socket.on('connect', function(user) {
-        console.log('user connected: ' + user);
-    });
-
     socket.on('joined game', function(user) {
         console.log('user connected: ' + user);
         players.push(user);
@@ -51,6 +47,11 @@ function refreshGame() {
     gameState = false;
     players = [];
     publishedNumbers = [];
+}
+
+function playerWon(player) {
+    io.emit('user messages', player + " has won!!");
+    refreshGame();
 }
 
 function randomNumberInRange(min, max) {

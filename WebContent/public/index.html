@@ -60,9 +60,9 @@ ISBN 978-0-321-99670-1
             $('#numbersContainer').text(msg);
         });
 
-        socket.on('user messages'), function(msg) {
+        socket.on('user messages', function(msg) {
             $('#userMessages').append($('<li>').text(msg));
-        }
+        });
 
         function claimVictory() {
             var selectedNumberList = [];
@@ -77,7 +77,6 @@ ISBN 978-0-321-99670-1
         }
 
         //
-        <!--
         function getBoard() {
             $.get( "ajax/test.html", function( data ) {
                 $( ".result" ).html( data );
@@ -86,7 +85,6 @@ ISBN 978-0-321-99670-1
 
             return xyz;
         }
-        -->
 
     });
 
@@ -101,9 +99,16 @@ ISBN 978-0-321-99670-1
     Name: <input type="text" name="player_name">
     <button id="btnJoin">Join Bingo</button>
 
-    <div id="numbersContainer">X</div>
-    <ul id="userMessages">Y</ul>
-
+    <div>
+        <h3>Mark off the Number: </h3>
+        <div id="numbersContainer"></div>
+    </div>
+    
+    <div>
+        <h3>Messages: </h3>
+        <ul id="userMessages"></ul>
+    </div>
+    
     <h1>JavaScript Bingo</h1>
     <div id="boardContainer"></div>
     <button id="btnClaimVictory">Claim victory</button>

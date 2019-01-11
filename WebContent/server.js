@@ -20,8 +20,7 @@ router.get('/gamestate', function(req, res) {
 });
 
 router.post('/validation', function (req, res) {
-    console.log(req.body.gamecard);
-    var result = winnerValidation(req.body.gamecard, publishedNumbers, req.body.player);
+    var result = winnerValidation(req.body.gamecard, req.body.player);
     res.json({result: result});
 });
 
@@ -44,14 +43,17 @@ function publishNumbers() {
     do {
         randNumber = randomNumberInRange(1, 90);
     } 
-    while(publishedNumbers.includes(randNumber));
+    while (publishedNumbers.includes(randNumber) && publishedNumbers.length < 90);
+
+
+    if (publishedNumbers.length == 90) {
+        return;
+    }
 
     publishedNumbers.push(randNumber);
-
     io.emit('game numbers', randNumber);
-
     if (gameState = true) {
-        setTimeout(publishNumbers, 250);
+        setTimeout(publishNumbers, 3000);
     }
 }
 
@@ -79,14 +81,14 @@ function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function winnerValidation(sumbittedCard, pastNums, playerName) {
+function winnerValidation(sumbittedCard, playerName) {
     //rest end point to check game state
     var submittedLength = sumbittedCard.length;
 
     //All blocks are filled
     if (submittedLength == 15) {
-        for (var j = 0; j > submittedLength; j++) {
-            if (!pastNums.includes(sumbittedCard[j].value)) {
+        for (var j = 0; j < submittedLength; j++) {
+            if (!publishedNumbers.includes(parseInt(sumbittedCard[j].value))){
                 return 'Not a winner';
             }
         }

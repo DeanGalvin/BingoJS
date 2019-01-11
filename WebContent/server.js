@@ -46,10 +46,12 @@ function publishNumbers() {
     } 
     while(publishedNumbers.includes(randNumber));
 
+    publishedNumbers.push(randNumber);
+
     io.emit('game numbers', randNumber);
 
     if (gameState = true) {
-        setTimeout(publishNumbers, 3000);
+        setTimeout(publishNumbers, 250);
     }
 }
 

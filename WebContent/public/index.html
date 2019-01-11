@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <script src="/socket.io/socket.io.js"></script>
     <script src="board-utils.js"></script>
-    <script src="functions.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
             crossorigin="anonymous"></script>
@@ -20,8 +19,12 @@
 
             // When join button is clicked
             $("#btnJoin").click(function () {
-                $("#welcomeContainer").hide();
                 var playerName = $("#playerName").val();
+                if (playerName == '') {
+                    alert("Please enter your name before joining!");
+                    return;
+                }
+                $("#welcomeContainer").hide();
                 $("#playerNameContainer").text(playerName);
                 joinGame(playerName);
                 $("#gameContainer").show();
@@ -104,7 +107,7 @@
                             </h1>
                             <p class="lead">Enter your name below and click join!</p>
                                 <div class="form-group">
-                                    <input type="text" class="form-control mr-sm-2 form-control-lg" id="playerName">
+                                    <input type="text" required="required" class="form-control mr-sm-2 form-control-lg" id="playerName">
                                 </div>
                                 <button type="submit" class="btn btn btn-danger btn-lg btn-block" id="btnJoin">
                                     <i class="fa fa-trophy"></i> Join

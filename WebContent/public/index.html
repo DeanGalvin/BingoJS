@@ -61,6 +61,13 @@
                 $('#userMessages').prepend($('<li>').text(msg));
             });
 
+            socket.on('leaderboard', function (msg) {
+                var leaderBoardObj = JSON.parse(msg);
+                for (var key in leaderBoardObj) {
+                    $('#leaderBoardContainer').append($('<li>').text("Name: " + key + " - Point(s): " + leaderBoardObj[key]));
+                }
+            });
+
             function claimVictory() {
                 var selectedNumberList = [];
                 $(".selected").each(function () {
@@ -170,6 +177,11 @@
                 <div class="col-sm">
                     <h3><i class="fas fa-comments"></i> Messages: </h3>
                     <ul id="userMessages"></ul>
+                </div>
+
+                <div class="col-sm">
+                    <h3><i class="fas fa-trophy"></i> Leader board: </h3>
+                    <ul id="leaderBoardContainer"></ul>
                 </div>
             </div>
         </div>

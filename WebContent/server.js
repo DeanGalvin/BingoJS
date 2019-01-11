@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var gameState = false;
 var players = [];
 var publishedNumbers = [];
+var leaderBoard = {};
 var randNumber = 9999;
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -53,7 +54,7 @@ function publishNumbers() {
     publishedNumbers.push(randNumber);
     io.emit('game numbers', randNumber);
     if (gameState = true) {
-        setTimeout(publishNumbers, 3000);
+        setTimeout(publishNumbers, 300);
     }
 }
 
@@ -72,6 +73,8 @@ function refreshGame() {
 }
 
 function playerWon(player) {
+    leaderBoard[player] = (leaderBoard[player] == undefined ? 1 : leaderBoard[player] + 1);
+    io.emit('leaderboard', JSON.stringify(leaderBoard));
     io.emit('user messages', player + " has won!!");
     io.emit('refresh', "refresh the client");
     refreshGame();

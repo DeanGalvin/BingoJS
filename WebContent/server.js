@@ -49,7 +49,7 @@ function publishNumbers() {
     io.emit('game numbers', randNumber);
 
     if (gameState = true) {
-        setTimeout(publishNumbers, 500);
+        setTimeout(publishNumbers, 3000);
     }
 }
 
@@ -62,10 +62,14 @@ function refreshGame() {
     gameState = false;
     players = [];
     publishedNumbers = [];
+    if (players.length === 2) {
+        startGame();
+    }
 }
 
 function playerWon(player) {
     io.emit('user messages', player + " has won!!");
+    io.emit('refresh', "refresh the client");
     refreshGame();
 }
 

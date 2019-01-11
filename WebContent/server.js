@@ -19,9 +19,10 @@ router.get('/gamestate', function(req, res) {
     res.json({State: gameState});
 });
 
-router.post('/validation', function(req, res) {
+router.post('/validation', function (req, res) {
+    console.log(req.body.gamecard);
     var result = winnerValidation(req.body.gamecard, publishedNumbers, req.body.player);
-    res.json({Result: result});
+    res.json({result: result});
 });
 
 io.on('connection', function(socket) {
@@ -48,7 +49,7 @@ function publishNumbers() {
     io.emit('game numbers', randNumber);
 
     if (gameState = true) {
-        setTimeout(publishNumbers, 5000);
+        setTimeout(publishNumbers, 500);
     }
 }
 
@@ -70,6 +71,22 @@ function playerWon(player) {
 
 function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function winnerValidation(sumbittedCard, pastNums, playerName) {
+    //rest end point to check game state
+    var submittedLength = sumbittedCard.length;
+
+    //All blocks are filled
+    if (submittedLength == 15) {
+        for (var j = 0; j > submittedLength; j++) {
+            if (!pastNums.includes(sumbittedCard[j].value)) {
+                return 'Not a winner';
+            }
+        }
+        playerWon(playerName);
+        return 'Winner!';
+    }
 }
 
 app.use('/game', router);

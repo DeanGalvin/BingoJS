@@ -2,13 +2,27 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser');
 
 var gameState = false;
 var players = [];
 var publishedNumbers = [];
 var randNumber = 9999;
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 app.use(express.static('public'));
+
+var router = express.Router();
+
+router.get('/gamestate', function(req, res) {
+    res.json({State: gameState});
+});
+
+router.post('/validation', function(req, res) {
+    var result = winnerValidation(req.body, publishedNumbers);
+    res.json({Result: result});
+});
 
 io.on('connection', function(socket) {
     socket.on('joined game', function(user) {
@@ -57,6 +71,8 @@ function playerWon(player) {
 function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+app.use('/game', router);
 
 http.listen(3000, function() {
     console.log('Listening for Bingo on 3000...');

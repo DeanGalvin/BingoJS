@@ -20,7 +20,7 @@ router.get('/gamestate', function(req, res) {
 });
 
 router.post('/validation', function(req, res) {
-    var result = winnerValidation(req.body, publishedNumbers);
+    var result = winnerValidation(req.body.gamecard, publishedNumbers, req.body.player);
     res.json({Result: result});
 });
 

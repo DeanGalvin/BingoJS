@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="index_files/bingo.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
-    <script src="http://code.jquery.com/jquery.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="board-utils.js"></script>
     <script src="functions.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
     <script>
         var socket = io();
         $(document).ready(function () {
@@ -38,18 +40,22 @@
                 boardUtils().displayBoard("boardContainer");
             }
             var pastNumbers = [];
+            var numbersCount = 0;
             socket.on('game numbers', function (msg) {
                 var currentNumber = $('#numbersContainer').text();
                 if (currentNumber) {
                     $('#pastNumberWrapperContainer').show();
                     $('#pastNumbersContainer').prepend("  " + currentNumber);
+                    
                 }
+                numbersCount++;
+                $("#numbersCountContainer").text(numbersCount);
                 $('#numbersContainer').text(msg);
                 pastNumbers.push(msg);
             });
 
             socket.on('user messages', function (msg) {
-                $('#userMessages').append($('<li>').text(msg));
+                $('#userMessages').prepend($('<li>').text(msg));
             });
 
             function claimVictory() {
@@ -61,8 +67,22 @@
                     selectedNumber.value = square.html();
                     selectedNumberList.push(selectedNumber);
                 });
-                alert(JSON.stringify(selectedNumberList));
-                winnerValidation(selectedNumberList, pastNumbers);
+                var data = {};
+                data.player = $("#playerName").val();
+                data.gamecard = selectedNumberList;
+
+                $.post("/game/validation", data)
+                    .done(function (data) {
+                        analyzeResults(data);
+                    });
+            }
+
+            function analyzeResults(data) {
+                if (data.result == 'Winner!') {
+                    $('#winnerModal').modal('show')
+                } else {
+                    alert('Not a winner yet, keep playing!');
+                }
             }
 
         });
@@ -106,9 +126,9 @@
                         <strong>Online Bingo</strong>
                     </h1>
                 </div>
-                <div class="col-sm justify-content-center align-self-center"> 
+                <div class="col-sm justify-content-center align-self-center">
                     <h1 class="display-6 text-right">
-                        <i class="fas fa-chevron-right"></i>
+                        <i class="fas fa-user-circle"></i>
                         <strong><span id="playerNameContainer"></span></strong>
                     </h1>
                 </div>
@@ -136,7 +156,7 @@
 
                     <div id="numbersContainer" class="display-1 font-weight-bold"></div>
                     <div id="pastNumberWrapperContainer" style="display: none;">
-                        <p class="lead"><strong>Previous</strong> numbers:</p>
+                        <p class="lead"><strong>Previous numbers (total called <span id="numbersCountContainer"></span>):</strong></p>
                         <div id="pastNumbersContainer"></div>
                     </div>
                 </div>
@@ -150,6 +170,30 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="winnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Congratulations!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <h3>
+                        <img height="150" src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MDEuNTUxIDUwMS41NTEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUwMS41NTEgNTAxLjU1MTsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+Cjxwb2x5Z29uIHN0eWxlPSJmaWxsOiNGRjcwNTg7IiBwb2ludHM9IjI5Ni43NTEsNDEyLjczNSAyMDQuOCw0MTIuNzM1IDIyMC40NzMsMzc5LjI5OCAyMzQuMDU3LDM0Ny45NTEgMjY3LjQ5NCwzNDcuOTUxICAgMjgxLjA3OCwzNzkuMjk4ICIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRkZEMTVDOyIgZD0iTTM1NS4yNjUsNDEyLjczNWgtMjA4Ljk4Yy0xMS40OTQsMC0yMC44OTgsOS40MDQtMjAuODk4LDIwLjg5OHY2Ny45MThoMjQ5LjczMXYtNjcuOTE4ICBDMzc2LjE2Myw0MjIuMTM5LDM2Ni43NTksNDEyLjczNSwzNTUuMjY1LDQxMi43MzV6Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOiNGMTU0M0Y7IiBkPSJNMjgxLjA3OCwzNzkuMjk4Yy04LjM1OSw0LjE4LTE2LjcxOCw4LjM1OS0yNS4wNzgsMTEuNDk0bC01LjIyNCwxLjA0NWwtNS4yMjUtMi4wOSAgYy04LjM1OS0zLjEzNS0xNi43MTgtNy4zMTQtMjUuMDc4LTExLjQ5NGwxMy41ODQtMzEuMzQ3aDMyLjM5MkwyODEuMDc4LDM3OS4yOTh6Ii8+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6I0Y4QjY0QzsiIGQ9Ik0wLDU3LjQ2OXY0Mi44NDFDMCwyMDQuOCw2NC43ODQsMjk0LjY2MSwxNTUuNjksMzMyLjI3OGMyOS4yNTcsMTIuNTM5LDYxLjY0OSwxOC44MDgsOTUuMDg2LDE4LjgwOCAgIHM2NS44MjktNi4yNjksOTUuMDg2LTE4LjgwOGM5MC45MDYtMzcuNjE2LDE1NS42OS0xMjcuNDc4LDE1NS42OS0yMzEuOTY3VjU3LjQ2OUgweiBNNDU5Ljc1NSwxMDAuMzEgICBjMCw1MC4xNTUtMTcuNzYzLDk2LjEzMS00OC4wNjUsMTMyLjcwMmMtMzguNjYxLDQ1Ljk3NS05Ni4xMzEsNzYuMjc4LTE2MC45MTQsNzYuMjc4cy0xMjIuMjUzLTI5LjI1Ny0xNjAuOTE0LTc2LjI3OCAgIGMtMjkuMjU3LTM1LjUyNy00OC4wNjUtODIuNTQ3LTQ4LjA2NS0xMzIuNzAydi0xLjA0NUg0NTguNzF2MS4wNDVINDU5Ljc1NXoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNGOEI2NEM7IiBkPSJNNDEzLjc4LDBIODcuNzcxYy03LjMxNCwwLTEyLjUzOSw2LjI2OS0xMi41MzksMTIuNTM5YzAsNy4zMTQsNS4yMjQsMTMuNTg0LDEyLjUzOSwxMy41ODRINDEzLjc4ICAgYzcuMzE0LDAsMTIuNTM5LTYuMjY5LDEyLjUzOS0xMi41MzlDNDI2LjMxOCw2LjI2OSw0MjEuMDk0LDAsNDEzLjc4LDB6Ii8+CjwvZz4KPHBhdGggc3R5bGU9ImZpbGw6I0ZGRDE1QzsiIGQ9Ik00MTMuNzgsMjYuMTIydjExMi44NDljMCwxMDQuNDktNjQuNzg0LDE5OS41NzYtMTYzLjAwNCwyMzcuMTkyICBjLTk4LjIyLTM4LjY2MS0xNjMuMDA0LTEzMi43MDItMTYzLjAwNC0yMzguMjM3VjI2LjEyMkg0MTMuNzh6Ii8+Cjxwb2x5Z29uIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBwb2ludHM9IjI1MC43NzYsNzMuMTQzIDI3Mi43MTgsMTQwLjAxNiAzNDIuNzI3LDE0MC4wMTYgMjg2LjMwMiwxODEuODEyIDMwNy4yLDI0OC42ODYgICAyNTAuNzc2LDIwNi44OSAxOTQuMzUxLDI0OC42ODYgMjE1LjI0OSwxODEuODEyIDE1OC44MjQsMTQwLjAxNiAyMjguODMzLDE0MC4wMTYgIi8+CjxyZWN0IHg9Ijg3Ljc3MSIgeT0iMjYuMTIyIiBzdHlsZT0iZmlsbDojRkZDOTUyOyIgd2lkdGg9IjMyNC45NjMiIGhlaWdodD0iMTUuNjczIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" />
+                        You are the winner!
+                        </h3>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -160,7 +204,7 @@
     
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 </body>

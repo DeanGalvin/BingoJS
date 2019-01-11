@@ -19,9 +19,9 @@ router.get('/gamestate', function(req, res) {
     res.json({State: gameState});
 });
 
-router.post('/validation', function(req, res) {
-    var result = winnerValidation(req.body.gamecard, publishedNumbers, req.body.player);
-    res.json({Result: result});
+router.post('/validation', function (req, res) {
+    var result = winnerValidation(req.body.gamecard, req.body.player);
+    res.json({result: result});
 });
 
 io.on('connection', function(socket) {
@@ -43,12 +43,17 @@ function publishNumbers() {
     do {
         randNumber = randomNumberInRange(1, 90);
     } 
-    while(publishedNumbers.includes(randNumber));
+    while (publishedNumbers.includes(randNumber) && publishedNumbers.length < 90);
 
+
+    if (publishedNumbers.length == 90) {
+        return;
+    }
+
+    publishedNumbers.push(randNumber);
     io.emit('game numbers', randNumber);
-
     if (gameState = true) {
-        setTimeout(publishNumbers, 5000);
+        setTimeout(publishNumbers, 3000);
     }
 }
 
@@ -61,15 +66,35 @@ function refreshGame() {
     gameState = false;
     players = [];
     publishedNumbers = [];
+    if (players.length === 2) {
+        startGame();
+    }
 }
 
 function playerWon(player) {
     io.emit('user messages', player + " has won!!");
+    io.emit('refresh', "refresh the client");
     refreshGame();
 }
 
 function randomNumberInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function winnerValidation(sumbittedCard, playerName) {
+    //rest end point to check game state
+    var submittedLength = sumbittedCard.length;
+
+    //All blocks are filled
+    if (submittedLength == 15) {
+        for (var j = 0; j < submittedLength; j++) {
+            if (!publishedNumbers.includes(parseInt(sumbittedCard[j].value))){
+                return 'Not a winner';
+            }
+        }
+        playerWon(playerName);
+        return 'Winner!';
+    }
 }
 
 app.use('/game', router);

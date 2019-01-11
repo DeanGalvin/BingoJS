@@ -4,7 +4,7 @@ function boardUtils() {
         var board = prepareBoard();
         var boardTable = $("<table>");
         boardTable.attr("id", "board");
-        var tileId = 0;
+        var tileId = 1;
         // Iterate over the rows
         for (var i = 0; i < board[0].length; i++) {
             var row = $("<tr>");

@@ -14,9 +14,9 @@ function sequenceGen(){
     pastNumbers.push(randNum);
 }
 
-function winnerValidation(sumbittedCard, pastNums) {
+function winnerValidation(sumbittedCard, pastNums, userName) {
     //rest end point to check game state
-    var submittedLength = submittedCard.number.length();
+    var submittedLength = sumbittedCard.length;
     // var pastNums = sequenceGen.pastNumbers;
     //getPastNumbers{}
 
@@ -25,7 +25,7 @@ function winnerValidation(sumbittedCard, pastNums) {
     //All blocks are filled
     if (submittedLength == 15) {
         for (var j=0; j>submittedLength; j++) {
-            if (!pastNums.includes(submittedCard.value[j])) {
+            if (!pastNums.includes(sumbittedCard[j].value)) {
                 return 'Not a winner';
             }
         }
@@ -35,20 +35,28 @@ function winnerValidation(sumbittedCard, pastNums) {
 
     //four corners logic
     //if submitted have id 1,3,25,27
-    if ( sumbittedCard.includes(sumbittedCard.id(1)) && 
-            sumbittedCard.includes(sumbittedCard.id(3)) && 
-            sumbittedCard.includes(sumbittedCard.id(25)) && 
-            sumbittedCard.includes(sumbittedCard.id(27)) ) {
+    if (idExistsInArray('1', sumbittedCard) && 
+        idExistsInArray('3', sumbittedCard) && 
+        idExistsInArray('25', sumbittedCard) && 
+        idExistsInArray('27', sumbittedCard)) {
 
         //if submitted with these ids are in pastNums
-        if ( pastNums.includes(submitted.id(1)) && 
-                pastNums.includes(submitted.id(3)) && 
-                pastNums.includes(submitted.id(25)) && 
-                pastNums.includes(submitted.id(27)) ) {
+        if (pastNums.includes(getValueWithId('1', sumbittedCard)) && 
+            pastNums.includes(getValueWithId('3', sumbittedCard)) && 
+            pastNums.includes(getValueWithId('25', sumbittedCard)) && 
+            pastNums.includes(getValueWithId('27', sumbittedCard)) ) {
 
             playerWon(playerName);
             return 'Winner!';
         }
+    }
+
+    function idExistsInArray(id, array) {
+        return array.filter(e => e.id === id).length > 0;
+    }
+
+    function getValueWithId(id, array) {
+        return array.filter(e => e.id === id)[0].value;
     }
 
     //line

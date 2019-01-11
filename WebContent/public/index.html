@@ -11,6 +11,7 @@
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="board-utils.js"></script>
+    <script src="functions.js"></script>
     <script>
         var socket = io();
         $(document).ready(function () {
@@ -32,11 +33,11 @@
             // Notify the server, gets and display the board
             function joinGame(playerName) {
                 console.log(playerName);
-                
+
                 socket.emit('joined game', playerName);
                 boardUtils().displayBoard("boardContainer");
             }
-
+            var pastNumbers = [];
             socket.on('game numbers', function (msg) {
                 var currentNumber = $('#numbersContainer').text();
                 if (currentNumber) {
@@ -44,6 +45,7 @@
                     $('#pastNumbersContainer').prepend("  " + currentNumber);
                 }
                 $('#numbersContainer').text(msg);
+                pastNumbers.push(msg);
             });
 
             socket.on('user messages', function (msg) {
@@ -56,10 +58,11 @@
                     var square = $(this);
                     var selectedNumber = {};
                     selectedNumber.id = square.attr("id");
-                    selectedNumber.number = square.html();
+                    selectedNumber.value = square.html();
                     selectedNumberList.push(selectedNumber);
                 });
                 alert(JSON.stringify(selectedNumberList));
+                winnerValidation(selectedNumberList, pastNumbers);
             }
 
         });

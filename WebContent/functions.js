@@ -71,6 +71,20 @@ function winnerValidation(sumbittedCard, pastNums) {
             thirdHorizontalLine = false;
         }
     }
+    //check for two lines
+    if (firstHorizontalLine==true && (secondHorizontalLine==true || thirdHorizontalLine==true)) {
+        playerWon(playerName);
+        return 'Winner! score X2';
+    }
+    if (secondHorizontalLine==true && (firstHorizontalLine==true || thirdHorizontalLine==true)) {
+        playerWon(playerName);
+        return 'Winner! score X2';
+    }
+    if (thirdHorizontalLine==true && (firstHorizontalLine==true || secondHorizontalLine==true)) {
+        playerWon(playerName);
+        return 'Winner! score X2';
+    }
+    //check for one line
     if (firstHorizontalLine==true) {
         playerWon(playerName);
         return 'Winner!';
@@ -123,13 +137,4 @@ function winnerValidation(sumbittedCard, pastNums) {
     }
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-    //two lines
-    if ( sumbittedCard.includes(sumbittedCard.id(1)) && 
-            sumbittedCard.includes(sumbittedCard.id(2)) && 
-            sumbittedCard.includes(sumbittedCard.id(3)) ) {
-
-    //Need to check for two rows
-        //do a for loop here
-
-    }
 }
